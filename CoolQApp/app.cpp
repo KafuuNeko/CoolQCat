@@ -7,6 +7,7 @@ regex gPexelsRegExp("data-photo-modal-image-download-link=\'(.*?)\'");
 bool gDisposeLock = false;
 
 void AppDispose(int8_t pType,const char *pMsg, int64_t pFromQQ, int64_t pFromGroup) {
+	
 	if (!strcmp(pMsg, "猫")) {
 		//检测是否有线程正在处理，一次只允许一个处理，避免卡死
 		if (gDisposeLock) {
@@ -16,7 +17,23 @@ void AppDispose(int8_t pType,const char *pMsg, int64_t pFromQQ, int64_t pFromGro
 
 		gDisposeLock = true;//开启处理锁
 		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "指令匹配完成，正在获取猫图像");
-		string fileName = GetPhoto_Cat();
+		string fileName;
+
+
+		switch (ReadConfig("Api", "s", 0, "config.ini")) {
+		case 0:
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "Api：Baidu");
+			fileName = GetPhoto_Baidu();
+			break;
+		case 1:
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "Api：Pexels");
+			fileName = GetPhoto_Pexels();
+			break;
+		default:
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "Api：Baidu");
+			fileName = GetPhoto_Baidu();
+		}
+
 		if (fileName != "") {
 			char imageCode[128];
 			sprintf_s(imageCode, "[CQ:image,file=%s]", fileName.c_str());
@@ -41,17 +58,126 @@ void SendMessage(int8_t pType, int64_t id, int64_t group, const char *msg) {
 	}
 }
 
-int pMaxPage = 170;
-vector<vector<string>> pImageUrlList(pMaxPage);//图片url清单
+int pPexelsMaxPage = 170,pBaiduMaxPage = 100;
+vector<vector<string>> pImageUrlList(pPexelsMaxPage);//图片url清单
 
-string GetPhoto_Cat()
+/*
+ * 获取猫猫图片，返回图片文件名
+ * API Baidu
+*/
+string GetPhoto_Baidu() {
+	ostringstream tempOstr;
+	int page = 0;
+
+cmd_rand_page:
+	srand((unsigned)time(NULL));
+	page = random(pBaiduMaxPage - 1);
+
+	tempOstr << "random page:" << page;
+	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());
+	tempOstr.clear();
+	tempOstr.str("");
+
+	if (page < 0 || page > pBaiduMaxPage) {
+		delay_msec(100);
+		goto cmd_rand_page;
+	}
+
+	char url[256];
+	sprintf_s(url
+		,"http://m.baidu.com/sf/vsearch/image/search/wisesearchresult?tn=wisejsonala&ie=utf-8&fromsf=1&word=%s&pn=%d&rn=10&gsm=&searchtype=2&prefresh=undefined&from=link&type=2"
+		,"%E7%8C%AB+%E5%8A%A8%E7%89%A9+%E5%8F%AF%E7%88%B1" 
+		,page*10);
+	string searchString(ReadWebStr(url));//取网页源码
+
+	Json::Reader *reader = new Json::Reader(Json::Features::strictMode());
+	Json::Value root;
+	reader->parse(searchString, root);
+	
+	if (root["linkData"].size() <= 0) {
+		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "linkData为空");
+		delete reader;
+		return "";
+	}
+
+	int index = 0;
+cmd_rand_index:
+	srand((unsigned)time(NULL));
+	index = random(root["linkData"].size() - 1);
+
+	tempOstr << "index:" << index;
+	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());
+	tempOstr.clear();
+	tempOstr.str("");
+
+	if (index < 0) {
+		delay_msec(100);
+		goto cmd_rand_index;
+	}
+
+	//取出objurl
+	Json::Value jsonImgValue = root["linkData"][index].get("objurl", NULL);
+
+	if (jsonImgValue == NULL) {
+		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "objurl为空");
+		delete reader;
+		return "";
+	}
+
+	string imgUrl = jsonImgValue.asString();
+	if (imgUrl.find("tuzhan") != imgUrl.npos) {
+		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "检测到图片来源为tuzhan，使用thumbnailUrl");
+		jsonImgValue = root["linkData"][index].get("thumbnailUrl", NULL);
+		imgUrl = jsonImgValue.asString();
+	}
+	MD5 *fileNameMd5 = new MD5(imgUrl);
+	
+	string fileName = fileNameMd5->toString()+".img";
+
+	char savePath[256];
+	sprintf_s(savePath, ".\\data\\image\\%s", fileName);
+
+	//检查图片是否已经缓存，若已缓存，则无需下载
+	if ((_access(savePath, 0)) == -1) {
+		if (!DownloadSaveFiles((char *)imgUrl.c_str(), savePath)) {
+			//如果下载失败，则切换图片来源再次下载
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "objurl下载失败，尝试使用hoverUrl");
+			jsonImgValue = root["linkData"][index].get("hoverUrl", NULL);
+			if (jsonImgValue == NULL) {
+				CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "hoverUrl为空");
+				delete reader;
+				return "";
+			}
+			imgUrl = jsonImgValue.asString();
+			if (!DownloadSaveFiles((char *)imgUrl.c_str(), savePath)) {
+				CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "hoverUrl下载失败");
+				delete reader;
+				return "";
+			}
+		}
+	}
+	else {
+		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "检测到猫片已缓存");
+	}
+
+	delete reader;
+	return fileName;
+}
+
+/*
+ * 获取猫猫图片，返回图片文件名
+ * API Pexels
+*/
+string GetPhoto_Pexels()
 {
 	ostringstream tempOstr;
 
 	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "取页码");
 
+	int page = 0;
 cmd_rand_page:
-	int page = random(pMaxPage-1);
+	srand((unsigned)time(NULL));
+	page = random(pPexelsMaxPage-1);
 	
 	tempOstr << "random page:" << page;
 	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());
@@ -59,7 +185,7 @@ cmd_rand_page:
 	tempOstr.str("");
 
 
-	if (page < 0 || page > 99) {
+	if (page < 0 || page > pPexelsMaxPage) {
 		delay_msec(100);//等待100ms重试
 		goto cmd_rand_page;
 	}
@@ -103,9 +229,10 @@ cmd_rand_page:
 	tempOstr.clear();
 	tempOstr.str("");
 
+	int index = 0;
 cmd_index_rand:
 	srand((unsigned)time(NULL));
-	int index = random(listSize-1);
+	index = random(listSize-1);
 
 	tempOstr << "index:" << index;
 	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());

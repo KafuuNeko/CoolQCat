@@ -4,7 +4,7 @@
 
 #define IDB_BUTTON_SAVE 1
 #define IDB_EDIT_DISTINCT 2
-
+#define IDB_COMBOBOX_APISEL 3
 LRESULT CALLBACK WinSunProc(
 	HWND hwnd,  //handle to window 窗口的句柄
 	UINT uMsg,   //message identifier 消息标识符
