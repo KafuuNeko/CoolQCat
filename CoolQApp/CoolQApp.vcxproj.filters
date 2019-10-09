@@ -13,7 +13,43 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\json">
+    <Filter Include="头文件\CoolQ">
+      <UniqueIdentifier>{b66a1233-51d3-4e5c-9c83-6dc46cc94fb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\CoolQ">
+      <UniqueIdentifier>{d59fefce-fe34-4bcb-b4f4-162468271cfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Other">
+      <UniqueIdentifier>{2faafef6-c483-4fc8-a764-998f2ce2d29f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Other\md5">
+      <UniqueIdentifier>{3b5e93de-2127-4279-839f-22f183c859ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Other">
+      <UniqueIdentifier>{675b778f-9354-49c3-bc8e-9be19b5faf07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Other\md5">
+      <UniqueIdentifier>{3d05bd2a-b3cc-4b90-ad7f-fc88f138cfe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\User">
+      <UniqueIdentifier>{6e9d2ddd-c08b-4071-8f5b-985282247ab7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\User">
+      <UniqueIdentifier>{47b1b07b-0314-470e-80b1-bbda4ba25018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\User\Helper">
+      <UniqueIdentifier>{a5ff2f3d-3aad-4159-adf3-ba3c67dccc5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\User\Windows">
+      <UniqueIdentifier>{d3288b13-0638-41ec-8e65-62ec4c4ef6c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\User\Helper">
+      <UniqueIdentifier>{2da9bd3b-9bdb-4430-81bc-29a2acb16c61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\User\Windows">
+      <UniqueIdentifier>{a4f69d53-2652-4155-890d-efe72cc9a636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Other\json">
       <UniqueIdentifier>{6f10e0a6-4268-4ae9-bc97-0420ab9e76c0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -24,23 +60,26 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Http.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="cqp.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="app.h">
+      <Filter>头文件\User</Filter>
     </ClInclude>
     <ClInclude Include="appmain.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\CoolQ</Filter>
     </ClInclude>
-    <ClInclude Include="app.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="cqp.h">
+      <Filter>头文件\CoolQ</Filter>
+    </ClInclude>
+    <ClInclude Include="md5\md5.h">
+      <Filter>头文件\Other\md5</Filter>
+    </ClInclude>
+    <ClInclude Include="Http.h">
+      <Filter>头文件\User\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="apphelper.h">
+      <Filter>头文件\User\Helper</Filter>
     </ClInclude>
     <ClInclude Include="win32-set.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="md5.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\User\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,32 +89,35 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Http.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="appmain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="dllmodul.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="app.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="win32-set.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="lib_json\json_reader.cpp">
-      <Filter>源文件\json</Filter>
+      <Filter>源文件\Other\json</Filter>
     </ClCompile>
     <ClCompile Include="lib_json\json_value.cpp">
-      <Filter>源文件\json</Filter>
+      <Filter>源文件\Other\json</Filter>
     </ClCompile>
     <ClCompile Include="lib_json\json_writer.cpp">
-      <Filter>源文件\json</Filter>
+      <Filter>源文件\Other\json</Filter>
     </ClCompile>
-    <ClCompile Include="md5.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="app.cpp">
+      <Filter>源文件\User</Filter>
+    </ClCompile>
+    <ClCompile Include="appmain.cpp">
+      <Filter>源文件\CoolQ</Filter>
+    </ClCompile>
+    <ClCompile Include="md5\md5.cpp">
+      <Filter>源文件\Other\md5</Filter>
+    </ClCompile>
+    <ClCompile Include="Http.cpp">
+      <Filter>源文件\User\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="apphelper.cpp">
+      <Filter>源文件\User\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="win32-set.cpp">
+      <Filter>源文件\User\Windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
