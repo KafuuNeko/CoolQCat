@@ -22,3 +22,4 @@ bool WriteConfig(const char *pNode, const char *pItem, int32_t pData, const char
 bool WriteConfig(const char *pNode, const char *pItem, const char *pData, const char *pFileName);
 void delay_msec(int msec);
 string GetPhoto_Baidu();
+string GetPhoto_Bing();

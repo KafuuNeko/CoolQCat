@@ -107,6 +107,8 @@ LRESULT CALLBACK WinSunProc(HWND hwnd,
 		SendMessage(hwndComboboxApiSel, CB_ADDSTRING, 0, (LPARAM)szText);
 		wsprintf(szText, "Pexels-质量高");
 		SendMessage(hwndComboboxApiSel, CB_ADDSTRING, 0, (LPARAM)szText);
+		wsprintf(szText, "Bing-速度快");
+		SendMessage(hwndComboboxApiSel, CB_ADDSTRING, 0, (LPARAM)szText);
 
 		comboboxApiSel = ReadConfig("Api", "s", 0, "config.ini");
 		SendMessage(hwndComboboxApiSel, CB_SETCURSEL, (WPARAM)comboboxApiSel, 0);

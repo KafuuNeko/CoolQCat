@@ -4,6 +4,8 @@
 using namespace std;
 extern int gAuthCode;//AuthCode
 regex gPexelsRegExp("data-photo-modal-image-download-link=\'(.*?)\'");
+regex gBingRegExp("src=\"(.*?)\"");
+
 bool gDisposeLock = false;
 
 void AppDispose(int8_t pType,const char *pMsg, int64_t pFromQQ, int64_t pFromGroup) {
@@ -22,15 +24,19 @@ void AppDispose(int8_t pType,const char *pMsg, int64_t pFromQQ, int64_t pFromGro
 
 		switch (ReadConfig("Api", "s", 0, "config.ini")) {
 		case 0:
-			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "Api：Baidu");
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "图片来源：Baidu");
 			fileName = GetPhoto_Baidu();
 			break;
 		case 1:
-			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "Api：Pexels");
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "图片来源：Pexels");
 			fileName = GetPhoto_Pexels();
 			break;
+		case 2:
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "图片来源：Bing");
+			fileName = GetPhoto_Bing();
+			break;
 		default:
-			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "Api：Baidu");
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "图片来源：Baidu");
 			fileName = GetPhoto_Baidu();
 		}
 
@@ -58,8 +64,91 @@ void SendMessage(int8_t pType, int64_t id, int64_t group, const char *msg) {
 	}
 }
 
-int pPexelsMaxPage = 170,pBaiduMaxPage = 100;
+int pPexelsMaxPage = 170,pBaiduMaxPage = 100,pBingMaxPage = 90;
 vector<vector<string>> pImageUrlList(pPexelsMaxPage);//图片url清单
+
+/*
+ * 获取猫猫图片，返回图片文件名
+ * API Bing
+*/
+
+string GetPhoto_Bing() {
+	ostringstream tempOstr;
+	int page = 0;
+
+cmd_rand_page:
+	srand((unsigned)time(NULL));
+	page = random(pBaiduMaxPage - 1);
+
+	tempOstr << "random page:" << page;
+	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());
+	tempOstr.clear();
+	tempOstr.str("");
+
+	if (page < 0 || page > pBaiduMaxPage) {
+		delay_msec(100);
+		goto cmd_rand_page;
+	}
+
+	char url[256];
+	sprintf_s(url
+		, "https://cn.bing.com/images/async?q=%s&first=%d&count=5&relp=5&layout=RowBased_Landscape&mmasync=1"
+		, "%E7%8C%AB%E7%8C%AB"
+		, page * 10);
+
+	string searchString(ReadWebStr(url));//取网页源码
+
+	string::const_iterator iterStart = searchString.begin();
+	string::const_iterator iterEnd = searchString.end();
+
+
+	smatch regexResult;
+	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "取出猫片清单");
+	vector<string> imageList;
+	while (regex_search(iterStart, iterEnd, regexResult, gBingRegExp)) {
+		string url = regexResult[1].str();
+		imageList.push_back(url.substr(0, url.find("&w=")));
+		iterStart = regexResult[0].second;
+	}
+
+	int listSize = imageList.size();
+	if (listSize == 0) {
+		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "图片清单为空");
+		return "";
+	}
+	
+	int index = 0;
+cmd_index_rand:
+	srand((unsigned)time(NULL));
+	index = random(listSize - 1);
+
+	tempOstr << "index:" << index;
+	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());
+	tempOstr.clear();
+	tempOstr.str("");
+
+	if (index < 0 || index >= listSize) {
+		delay_msec(100);//等待100ms重试
+		goto cmd_index_rand;
+	}
+	
+	MD5 *fileNameMD5 = new MD5(imageList[index]);
+	string fileName = "bing_" + fileNameMD5->toString() + ".img";
+	delete fileNameMD5;
+
+	char savePath[256];
+	sprintf_s(savePath, ".\\data\\image\\%s", fileName);
+
+	//检查图片是否已经缓存，若已缓存，则无需下载
+	if ((_access(savePath, 0)) == -1) {
+		if (!DownloadSaveFiles((char *)imageList[index].c_str(), savePath)) {
+			CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "图片下载失败");
+			return "";
+		}
+	}
+
+	return fileName;
+}
 
 /*
  * 获取猫猫图片，返回图片文件名
@@ -130,9 +219,12 @@ cmd_rand_index:
 		jsonImgValue = root["linkData"][index].get("thumbnailUrl", NULL);
 		imgUrl = jsonImgValue.asString();
 	}
+
 	MD5 *fileNameMd5 = new MD5(imgUrl);
 	
 	string fileName = fileNameMd5->toString()+".img";
+
+	delete fileNameMd5;
 
 	char savePath[256];
 	sprintf_s(savePath, ".\\data\\image\\%s", fileName);
