@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "appmain.h"
+#include "apphelper.h"
 #include "win32-set.h"
 
 using namespace std;
@@ -38,21 +39,21 @@ CQEVENT(int32_t, __eventDisable, 0)() {
 }
 
 CQEVENT(int32_t, __eventPrivateMsg, 24)(int32_t subType, int32_t msgId, int64_t fromQQ, const char *msg, int32_t font) {
-	AppDispose(PRIVATE_MSG, msg, fromQQ, 0);
+	gAppDispose(PRIVATE_MSG, msg, fromQQ, 0);
 	return EVENT_IGNORE;
 }
 
 CQEVENT(int32_t, __eventGroupMsg, 36)(int32_t subType, int32_t msgId, int64_t fromGroup, int64_t fromQQ, const char *fromAnonymous, const char *msg, int32_t font) {
-	AppDispose(GROUP_MSG, msg, fromQQ, fromGroup);
+	gAppDispose(GROUP_MSG, msg, fromQQ, fromGroup);
 	return EVENT_IGNORE; //关于返回值说明, 见“_eventPrivateMsg”函数
 }
 
 CQEVENT(int32_t, __eventDiscussMsg, 32)(int32_t subType, int32_t msgId, int64_t fromDiscuss, int64_t fromQQ, const char *msg, int32_t font) {
-	AppDispose(DISCUSS_MSG, msg, fromQQ, fromDiscuss);
+	gAppDispose(DISCUSS_MSG, msg, fromQQ, fromDiscuss);
 	return EVENT_IGNORE; //关于返回值说明, 见“_eventPrivateMsg”函数
 }
 
 CQEVENT(int32_t, __menuSet, 0)() {
-	LoadWindows_MenuSet();
+	gLoadWindowsMenuSet();
 	return 0;
 }

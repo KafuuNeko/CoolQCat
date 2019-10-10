@@ -4,19 +4,9 @@
 #include <io.h>
 #include <time.h>
 #include <sstream>
-
-#include "apphelper.h"
-#include "Http.h"
-#include "cqp.h"
-#include "./md5/md5.h"
-#include "./json/json.h"
+#include <regex>
 
 using std::string;
 
-void AppDispose(int8_t pType, const char *pMsg, int64_t pFromQQ, int64_t pFromGroup);
+void gAppDispose(int8_t pnType, const char *pcMsg, int64_t pnFromQQ, int64_t pnFromGroup);
 
-namespace CatPhoto {
-	string GetPhotoPexels();
-	string GetPhotoBaidu();
-	string GetPhotoBing();
-}

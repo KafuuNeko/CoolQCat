@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "Http.h"
 
+
 using namespace std;
 //下载文件并保存为新文件名
-bool DownloadSaveFiles(char* url, char *strSaveFile) {
-	bool ret = false;
+bool gDownloadSaveFiles(char* pcUrl, char *pcSaveFile) {
+	bool bResult = false;
 	CInternetSession Sess("lpload");
 	Sess.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT, 2000); //2秒的连接超时
 	Sess.SetOption(INTERNET_OPTION_SEND_TIMEOUT, 2000); //2秒的发送超时
@@ -18,7 +19,7 @@ bool DownloadSaveFiles(char* url, char *strSaveFile) {
 	int        nBufLen = 0;
 	do {
 		try {
-			cFile = (CHttpFile*)Sess.OpenURL(url, 1, dwFlag);
+			cFile = (CHttpFile*)Sess.OpenURL(pcUrl, 1, dwFlag);
 			DWORD dwStatusCode;
 			cFile->QueryInfoStatusCode(dwStatusCode);
 			if (dwStatusCode == HTTP_STATUS_OK) {
@@ -50,10 +51,10 @@ bool DownloadSaveFiles(char* url, char *strSaveFile) {
 
 				//接收成功保存到文件
 
-				CFile file(strSaveFile, CFile::modeCreate | CFile::modeWrite);
+				CFile file(pcSaveFile, CFile::modeCreate | CFile::modeWrite);
 				file.Write(pBuf, nBufLen);
 				file.Close();
-				ret = true;
+				bResult = true;
 			}
 		}
 		catch (...) {
@@ -74,15 +75,15 @@ bool DownloadSaveFiles(char* url, char *strSaveFile) {
 		Sess.Close();
 		delete cFile;
 	}
-	return ret;
+	return bResult;
 }
 
-string ReadWebStr(const char *url) {
-	CString content;
+string gReadWebStr(const char *pcUrl) {
+	CString csContent;
 
-	CInternetSession session("HttpClient");
+	CInternetSession ciSession("HttpClient");
 
-	CHttpFile *pfile = (CHttpFile *)session.OpenURL(url);
+	CHttpFile *pfile = (CHttpFile *)ciSession.OpenURL(pcUrl);
 
 	DWORD dwStatusCode;
 	pfile->QueryInfoStatusCode(dwStatusCode);
@@ -93,14 +94,14 @@ string ReadWebStr(const char *url) {
 
 		while (pfile->ReadString(data))
 		{
-			content += data + "\r\n";
+			csContent += data + "\r\n";
 		}
-		content.TrimRight();
+		csContent.TrimRight();
 
 	}
 	pfile->Close();
 	delete pfile;
-	session.Close();
+	ciSession.Close();
 
-	return string(content);
+	return string(csContent);
 }

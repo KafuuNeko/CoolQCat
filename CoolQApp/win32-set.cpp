@@ -1,11 +1,23 @@
 #include "stdafx.h"
 #include "win32-set.h"
+#include "app.h"
+#include "apphelper.h"
+
+#include <sstream>
+#include <Windows.h>
 
 using namespace std;
 
 bool windowsExist = false;
 
-void LoadWindows_MenuSet()
+LRESULT CALLBACK __WinSunProc(
+	HWND hwnd,  //handle to window 窗口的句柄
+	UINT uMsg,   //message identifier 消息标识符
+	WPARAM wParam,  //first message parameter 第一个消息参数
+	LPARAM lParam  //second message parameter 第二个消息参数
+);  //回调函数
+
+void gLoadWindowsMenuSet()
 {
 	if (windowsExist) {
 		return;
@@ -15,7 +27,7 @@ void LoadWindows_MenuSet()
 	wndcls.cbClsExtra = 0;
 	wndcls.cbWndExtra = 0;
 	wndcls.hbrBackground = (HBRUSH)COLOR_WINDOW;
-	wndcls.lpfnWndProc = WinSunProc;
+	wndcls.lpfnWndProc = __WinSunProc;
 	wndcls.lpszClassName = "MenuWindows";
 	wndcls.lpszMenuName = NULL;
 	wndcls.style = CS_HREDRAW | CS_VREDRAW;
@@ -41,7 +53,7 @@ void LoadWindows_MenuSet()
 	windowsExist = false;
 }
 
-LRESULT CALLBACK WinSunProc(HWND hwnd,
+LRESULT CALLBACK __WinSunProc(HWND hwnd,
 	UINT uMsg,
 	WPARAM wParam,
 	LPARAM lParam)
@@ -66,13 +78,13 @@ LRESULT CALLBACK WinSunProc(HWND hwnd,
 			GetDlgItemText(hwnd, IDB_EDIT_DISTINCT, (LPSTR)sztitle, 32);
 
 			os << sztitle;
-			WriteConfig("image", "w", os.str().c_str(), "config.ini");
+			gWriteConfig("image", "w", os.str().c_str(), "config.ini");
 
 			if (comboboxApiSel == CB_ERR) {
 				MessageBoxA(hwnd, TEXT("无法获取combobox索引"), TEXT("信息"), 64);
 			}
 			else {
-				WriteConfig("Api", "s", comboboxApiSel, "config.ini");
+				gWriteConfig("Api", "s", comboboxApiSel, "config.ini");
 			}
 
 			MessageBoxA(hwnd, TEXT("您已成功保存设置"), TEXT("信息"), 64);
@@ -93,7 +105,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd,
 		CreateWindow("static", TEXT("Pexels-清晰度："), WS_CHILD | WS_VISIBLE | WS_BORDER,
 			5, 20, 130, 25, hwnd, NULL, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
 		
-		tempStr = ReadConfig("image","w","600","config.ini");
+		tempStr = gReadConfig("image","w","600","config.ini");
 		hwndEditDistinct = CreateWindow("edit", TEXT(tempStr), WS_CHILD | WS_VISIBLE | WS_BORDER,
 			135, 20, 100, 25, hwnd, (HMENU)IDB_EDIT_DISTINCT, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
 		delete[] tempStr;
@@ -110,7 +122,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd,
 		wsprintf(szText, "Bing-速度快");
 		SendMessage(hwndComboboxApiSel, CB_ADDSTRING, 0, (LPARAM)szText);
 
-		comboboxApiSel = ReadConfig("Api", "s", 0, "config.ini");
+		comboboxApiSel = gReadConfig("Api", "s", 0, "config.ini");
 		SendMessage(hwndComboboxApiSel, CB_SETCURSEL, (WPARAM)comboboxApiSel, 0);
 		
 		break;
