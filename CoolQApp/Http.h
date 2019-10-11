@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <string>
 
-#define RANDOM(x) (rand()%x)
-
 #define RECVPACK_SIZE 2048
 
 using std::string;

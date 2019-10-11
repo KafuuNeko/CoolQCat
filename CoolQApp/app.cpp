@@ -78,7 +78,7 @@ void gAppDispose(int8_t pnType,const char *pcMsg, int64_t pnFromQQ, int64_t pnFr
  * API Bing
 */
 string CatPhoto::__GetPhotoBing() {
-	int nPage = gRandomS(gnBingMaxPage, "random page");
+	int nPage = gRandomS(gnBingMaxPage, "page");
 
 	char cBingUrl[256];
 	sprintf_s(cBingUrl
@@ -126,7 +126,7 @@ string CatPhoto::__GetPhotoBing() {
  * API Baidu
 */
 string CatPhoto::__GetPhotoBaidu() {
-	int nPage = gRandomS(gnBaiduMaxPage, "random page");
+	int nPage = gRandomS(gnBaiduMaxPage, "page");
 
 	char cBaiduUrl[256];
 	sprintf_s(cBaiduUrl
@@ -193,7 +193,7 @@ string CatPhoto::__GetPhotoBaidu() {
 */
 string CatPhoto::__GetPhotoPexels()
 {
-	int nPage = gRandomS(gnPexelsMaxPage, "random page");
+	int nPage = gRandomS(gnPexelsMaxPage - 1, "page");
 
 	if (gvvsPexelsImageUrlList[nPage].size() == 0) {
 		CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", "正在缓存图像列表");
@@ -244,9 +244,9 @@ string CatPhoto::__GetPhotoPexels()
 	}
 
 	sFileName = "w" + to_string(nImageW) + "-" + sFileName;
-	string downloadPath = sImageUrl + "?" + "w=" + to_string(nImageW);
+	string sDownloadPath = sImageUrl + "?" + "w=" + to_string(nImageW);
 
-	if (!gImageDownload(downloadPath, sFileName)) {
+	if (!gImageDownload(sDownloadPath, sFileName)) {
 		return "";
 	}
 

@@ -84,19 +84,14 @@ bool gImageDownload(string psDownUrl, string psFileName) {
 int gRandomS(int pnMax, string psDescribe) {
 	ostringstream tempOstr;
 
-	int page = 0;
-cmd_rand_page:
-	srand((unsigned)time(NULL));
-	page = RANDOM(pnMax - 1);
+	mt19937 rng;
+	rng.seed(random_device()());
+	uniform_int_distribution<int32_t> dis(0, pnMax);
+	int32_t res = dis(rng);
+	
+	tempOstr << psDescribe << ":Max[" << pnMax << "];Result[" << res << "]";
 
-	tempOstr << psDescribe << ":" << page;
-	CQ_addLog(gAuthCode, CQLOG_DEBUG, "dispose", tempOstr.str().c_str());
-	tempOstr.clear();
-	tempOstr.str("");
+	CQ_addLog(gAuthCode, CQLOG_DEBUG, "Random Device", tempOstr.str().c_str());
 
-	if (page < 0 || page > pnMax) {
-		gDelayMsec(100);
-		goto cmd_rand_page;
-	}
-	return page;
+	return res;
 }
