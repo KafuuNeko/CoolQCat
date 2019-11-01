@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string>
 
-#define RECVPACK_SIZE 2048
+#define RECVPACK_SIZE 4096
 
 using std::string;
 
